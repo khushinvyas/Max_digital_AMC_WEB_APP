@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -254,7 +253,7 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
       </div>
 
       {/* Print Styles */}
-      <style jsx>{`
+      <style>{`
         @media print {
           @page {
             margin: 1cm;
