@@ -20,6 +20,7 @@ interface Customer {
   invoiceAmount: number;
   status: 'active' | 'proposed' | 'expired' | 'suspended' | 'cancelled';
   nextServiceDate?: string;
+  lastServiceDate?: string;
 }
 
 export const useCustomers = () => {
@@ -65,6 +66,7 @@ export const useCustomers = () => {
         invoiceAmount: Number(customer.invoice_amount),
         status: customer.status,
         nextServiceDate: customer.next_service_date,
+        lastServiceDate: customer.last_service_date,
       })) || [];
 
       setCustomers(transformedCustomers);
@@ -103,6 +105,7 @@ export const useCustomers = () => {
           invoice_amount: customerData.invoiceAmount,
           status: customerData.status,
           next_service_date: customerData.nextServiceDate,
+          last_service_date: customerData.lastServiceDate,
         })
         .select()
         .single();
@@ -155,6 +158,7 @@ export const useCustomers = () => {
           invoice_amount: updatedCustomer.invoiceAmount,
           status: updatedCustomer.status,
           next_service_date: updatedCustomer.nextServiceDate,
+          last_service_date: updatedCustomer.lastServiceDate,
         })
         .eq('id', updatedCustomer.id);
 

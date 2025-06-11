@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -52,16 +51,64 @@ const Dashboard = () => {
 
     let nextServiceDate = customer.nextServiceDate;
     if (customer.amcType === 'A') {
-      // Weekly service - find next Monday
-      const nextMonday = new Date(today);
-      nextMonday.setDate(today.getDate() + (7 - today.getDay() + 1) % 7);
-      nextServiceDate = nextMonday.toISOString().split('T')[0];
+      // Weekly service - maintain same day of week as start date
+      const startDay = startDate.getDay(); // 0-6 (Sunday-Saturday)
+      const currentDay = today.getDay();
+      
+      // Calculate days until next service
+      let daysUntilNextService = (startDay - currentDay + 7) % 7;
+      if (daysUntilNextService === 0) {
+        // If today is the service day, check if we need to schedule for next week
+        if (new Date(customer.lastServiceDate) >= today) {
+          daysUntilNextService = 7;
+        }
+      }
+      
+      const nextService = new Date(today);
+      nextService.setDate(today.getDate() + daysUntilNextService);
+      nextServiceDate = nextService.toISOString().split('T')[0];
     } else if (customer.amcType === 'B') {
-      // Monthly service - same date next month
-      const nextMonth = new Date(today);
-      nextMonth.setMonth(today.getMonth() + 1);
-      nextMonth.setDate(startDate.getDate());
-      nextServiceDate = nextMonth.toISOString().split('T')[0];
+      // Monthly service - maintain same date of month as start date
+      const startDateOfMonth = startDate.getDate(); // Get the date (1-31) from start date
+      const currentDate = today.getDate();
+      
+      // Calculate months until next service
+      let monthsUntilNextService = 0;
+      if (currentDate > startDateOfMonth) {
+        // If we've passed the service date this month, schedule for next month
+        monthsUntilNextService = 1;
+      }
+      
+      const nextService = new Date(today);
+      nextService.setMonth(today.getMonth() + monthsUntilNextService);
+      
+      // Handle edge cases for months with different number of days
+      const daysInTargetMonth = new Date(
+        nextService.getFullYear(),
+        nextService.getMonth() + 1,
+        0
+      ).getDate();
+      
+      // If the target date doesn't exist in the target month (e.g., Jan 31 -> Feb 28),
+      // use the last day of the target month
+      const targetDate = Math.min(startDateOfMonth, daysInTargetMonth);
+      nextService.setDate(targetDate);
+      
+      // If the calculated date is today and service was already done today,
+      // schedule for next month
+      if (nextService.toISOString().split('T')[0] === today.toISOString().split('T')[0] &&
+          new Date(customer.lastServiceDate) >= today) {
+        nextService.setMonth(nextService.getMonth() + 1);
+        // Recalculate the target date for the new month
+        const daysInNewMonth = new Date(
+          nextService.getFullYear(),
+          nextService.getMonth() + 1,
+          0
+        ).getDate();
+        nextService.setDate(Math.min(startDateOfMonth, daysInNewMonth));
+      }
+      
+      nextServiceDate = nextService.toISOString().split('T')[0];
     }
 
     return { ...customer, status, nextServiceDate };
@@ -75,11 +122,25 @@ const Dashboard = () => {
   const today = new Date().toISOString().split('T')[0];
   const todaysServices = customersWithUpdatedStatus.filter(c => c.nextServiceDate === today);
   
-  const expiringIn7Days = customersWithUpdatedStatus.filter(c => {
-    const endDate = new Date(c.amcEndDate);
-    const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    return endDate <= sevenDaysFromNow && endDate >= new Date();
-  });
+  const expiringIn7Days = customersWithUpdatedStatus
+    .filter(c => {
+      const today = new Date();
+      const endDate = new Date(c.amcEndDate);
+      const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+      
+      // Only include active customers
+      if (c.status !== 'active') return false;
+      
+      // Check if the end date is within the next 7 days and hasn't expired yet
+      return endDate <= sevenDaysFromNow && endDate > today;
+    })
+    .map(customer => {
+      const today = new Date();
+      const endDate = new Date(customer.amcEndDate);
+      const daysRemaining = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+      return { ...customer, daysRemaining };
+    })
+    .sort((a, b) => a.daysRemaining - b.daysRemaining); // Sort by days remaining ascending
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -90,6 +151,20 @@ const Dashboard = () => {
       case 'cancelled': return 'bg-gray-100 text-gray-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getRenewalAlertColor = (daysRemaining: number) => {
+    if (daysRemaining <= 3) {
+      return 'bg-red-50 border-red-200 text-red-800';
+    }
+    return 'bg-yellow-50 border-yellow-200 text-yellow-800';
+  };
+
+  const getRenewalAlertBadgeColor = (daysRemaining: number) => {
+    if (daysRemaining <= 3) {
+      return 'bg-red-100 text-red-800';
+    }
+    return 'bg-yellow-100 text-yellow-800';
   };
 
   if (loading) {
@@ -255,14 +330,22 @@ const Dashboard = () => {
               ) : (
                 <div className="space-y-3">
                   {expiringIn7Days.map(customer => (
-                    <div key={customer.id} className="flex justify-between items-center p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                    <div 
+                      key={customer.id} 
+                      className={`flex justify-between items-center p-3 rounded-lg border ${getRenewalAlertColor(customer.daysRemaining)}`}
+                    >
                       <div>
                         <p className="font-medium">{customer.companyName}</p>
                         <p className="text-sm text-muted-foreground">{customer.ownerName}</p>
-                        <p className="text-sm text-yellow-600">Expires: {new Date(customer.amcEndDate).toLocaleDateString()}</p>
+                        <p className="text-sm">
+                          Expires: {new Date(customer.amcEndDate).toLocaleDateString()}
+                          <span className="ml-2 font-medium">
+                            ({customer.daysRemaining} {customer.daysRemaining === 1 ? 'day' : 'days'} remaining)
+                          </span>
+                        </p>
                       </div>
-                      <Badge className="bg-yellow-100 text-yellow-800">
-                        Expiring Soon
+                      <Badge className={getRenewalAlertBadgeColor(customer.daysRemaining)}>
+                        {customer.daysRemaining <= 3 ? 'Urgent Renewal' : 'Expiring Soon'}
                       </Badge>
                     </div>
                   ))}

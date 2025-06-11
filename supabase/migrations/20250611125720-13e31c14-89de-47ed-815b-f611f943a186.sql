@@ -1,4 +1,3 @@
-
 -- Create enum for AMC types
 CREATE TYPE public.amc_type AS ENUM ('A', 'B', 'C');
 
@@ -24,6 +23,7 @@ CREATE TABLE public.customers (
   invoice_amount DECIMAL(10,2) NOT NULL,
   status customer_status NOT NULL DEFAULT 'proposed',
   next_service_date DATE,
+  last_service_date DATE,
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
