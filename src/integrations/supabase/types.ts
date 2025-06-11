@@ -9,7 +9,102 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      customers: {
+        Row: {
+          address: string
+          amc_amount: number
+          amc_end_date: string
+          amc_start_date: string
+          amc_type: Database["public"]["Enums"]["amc_type"]
+          city: string
+          company_name: string
+          created_at: string
+          id: string
+          invoice_amount: number
+          invoice_date: string
+          invoice_number: string
+          next_service_date: string | null
+          owner_name: string
+          phone_number: string
+          product_description: string | null
+          status: Database["public"]["Enums"]["customer_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          amc_amount: number
+          amc_end_date: string
+          amc_start_date: string
+          amc_type: Database["public"]["Enums"]["amc_type"]
+          city: string
+          company_name: string
+          created_at?: string
+          id?: string
+          invoice_amount: number
+          invoice_date: string
+          invoice_number: string
+          next_service_date?: string | null
+          owner_name: string
+          phone_number: string
+          product_description?: string | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          amc_amount?: number
+          amc_end_date?: string
+          amc_start_date?: string
+          amc_type?: Database["public"]["Enums"]["amc_type"]
+          city?: string
+          company_name?: string
+          created_at?: string
+          id?: string
+          invoice_amount?: number
+          invoice_date?: string
+          invoice_number?: string
+          next_service_date?: string | null
+          owner_name?: string
+          phone_number?: string
+          product_description?: string | null
+          status?: Database["public"]["Enums"]["customer_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +113,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      amc_type: "A" | "B" | "C"
+      customer_status:
+        | "active"
+        | "proposed"
+        | "expired"
+        | "suspended"
+        | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +234,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      amc_type: ["A", "B", "C"],
+      customer_status: [
+        "active",
+        "proposed",
+        "expired",
+        "suspended",
+        "cancelled",
+      ],
+    },
   },
 } as const

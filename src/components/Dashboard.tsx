@@ -1,9 +1,11 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, FileText, Users } from 'lucide-react';
+import { Calendar, Clock, FileText, Users, LogOut } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useCustomers } from '@/hooks/useCustomers';
 import CustomerForm from './CustomerForm';
 import CustomerList from './CustomerList';
 import ProposalGenerator from './ProposalGenerator';
@@ -28,94 +30,52 @@ interface Customer {
 }
 
 const Dashboard = () => {
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [currentView, setCurrentView] = useState<'dashboard' | 'add-customer' | 'customers' | 'proposal'>('dashboard');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const { user, signOut } = useAuth();
+  const { customers, loading, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
 
-  // Load customers from localStorage on component mount
-  useEffect(() => {
-    const savedCustomers = localStorage.getItem('amcCustomers');
-    if (savedCustomers) {
-      const parsedCustomers = JSON.parse(savedCustomers);
-      // Update customer statuses and next service dates
-      const updatedCustomers = parsedCustomers.map((customer: Customer) => ({
-        ...customer,
-        ...updateCustomerStatus(customer),
-        nextServiceDate: calculateNextServiceDate(customer)
-      }));
-      setCustomers(updatedCustomers);
-    }
-  }, []);
-
-  // Save customers to localStorage whenever customers state changes
-  useEffect(() => {
-    localStorage.setItem('amcCustomers', JSON.stringify(customers));
-  }, [customers]);
-
-  const updateCustomerStatus = (customer: Customer) => {
-    const today = new Date();
-    const endDate = new Date(customer.amcEndDate);
-    const sevenDaysFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-    if (endDate < today) {
-      return { status: 'expired' as const };
-    } else if (endDate <= sevenDaysFromNow) {
-      return { status: 'active' as const }; // Still active but expiring soon
-    } else {
-      return { status: customer.status };
-    }
+  const handleSignOut = async () => {
+    await signOut();
   };
 
-  const calculateNextServiceDate = (customer: Customer): string => {
+  // Calculate customer status and next service dates
+  const customersWithUpdatedStatus = customers.map(customer => {
     const today = new Date();
+    const endDate = new Date(customer.amcEndDate);
     const startDate = new Date(customer.amcStartDate);
     
+    let status = customer.status;
+    if (endDate < today && customer.status === 'active') {
+      status = 'expired';
+    }
+
+    let nextServiceDate = customer.nextServiceDate;
     if (customer.amcType === 'A') {
       // Weekly service - find next Monday
       const nextMonday = new Date(today);
       nextMonday.setDate(today.getDate() + (7 - today.getDay() + 1) % 7);
-      return nextMonday.toISOString().split('T')[0];
+      nextServiceDate = nextMonday.toISOString().split('T')[0];
     } else if (customer.amcType === 'B') {
       // Monthly service - same date next month
       const nextMonth = new Date(today);
       nextMonth.setMonth(today.getMonth() + 1);
       nextMonth.setDate(startDate.getDate());
-      return nextMonth.toISOString().split('T')[0];
+      nextServiceDate = nextMonth.toISOString().split('T')[0];
     }
-    return ''; // Type C has no scheduled service
-  };
 
-  const addCustomer = (customerData: Omit<Customer, 'id'>) => {
-    const newCustomer: Customer = {
-      ...customerData,
-      id: Date.now().toString(),
-      nextServiceDate: calculateNextServiceDate(customerData as Customer)
-    };
-    setCustomers(prev => [...prev, newCustomer]);
-    setCurrentView('dashboard');
-  };
-
-  const updateCustomer = (updatedCustomer: Customer) => {
-    setCustomers(prev => prev.map(c => 
-      c.id === updatedCustomer.id 
-        ? { ...updatedCustomer, nextServiceDate: calculateNextServiceDate(updatedCustomer) }
-        : c
-    ));
-  };
-
-  const deleteCustomer = (customerId: string) => {
-    setCustomers(prev => prev.filter(c => c.id !== customerId));
-  };
+    return { ...customer, status, nextServiceDate };
+  });
 
   // Calculate dashboard metrics
-  const activeCustomers = customers.filter(c => c.status === 'active');
-  const proposedCustomers = customers.filter(c => c.status === 'proposed');
-  const expiredCustomers = customers.filter(c => c.status === 'expired');
+  const activeCustomers = customersWithUpdatedStatus.filter(c => c.status === 'active');
+  const proposedCustomers = customersWithUpdatedStatus.filter(c => c.status === 'proposed');
+  const expiredCustomers = customersWithUpdatedStatus.filter(c => c.status === 'expired');
   
   const today = new Date().toISOString().split('T')[0];
-  const todaysServices = customers.filter(c => c.nextServiceDate === today);
+  const todaysServices = customersWithUpdatedStatus.filter(c => c.nextServiceDate === today);
   
-  const expiringIn7Days = customers.filter(c => {
+  const expiringIn7Days = customersWithUpdatedStatus.filter(c => {
     const endDate = new Date(c.amcEndDate);
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
     return endDate <= sevenDaysFromNow && endDate >= new Date();
@@ -132,6 +92,17 @@ const Dashboard = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (currentView === 'add-customer') {
     return (
       <CustomerForm 
@@ -144,7 +115,7 @@ const Dashboard = () => {
   if (currentView === 'customers') {
     return (
       <CustomerList
-        customers={customers}
+        customers={customersWithUpdatedStatus}
         onBack={() => setCurrentView('dashboard')}
         onEdit={updateCustomer}
         onDelete={deleteCustomer}
@@ -175,14 +146,18 @@ const Dashboard = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-foreground">AMC Management System</h1>
-            <p className="text-muted-foreground">Manage your Annual Maintenance Contracts efficiently</p>
+            <p className="text-muted-foreground">Welcome back, {user?.email}</p>
           </div>
-          <div className="space-x-3">
+          <div className="flex items-center gap-3">
             <Button onClick={() => setCurrentView('add-customer')}>
               Add New Customer
             </Button>
             <Button variant="outline" onClick={() => setCurrentView('customers')}>
               View All Customers
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign Out
             </Button>
           </div>
         </div>
@@ -306,21 +281,21 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="text-center p-4 bg-blue-50 rounded-lg">
                 <div className="text-2xl font-bold text-blue-600">
-                  {customers.filter(c => c.amcType === 'A').length}
+                  {customersWithUpdatedStatus.filter(c => c.amcType === 'A').length}
                 </div>
                 <p className="text-sm text-blue-600">Type A (Premium)</p>
                 <p className="text-xs text-muted-foreground">Weekly Service</p>
               </div>
               <div className="text-center p-4 bg-green-50 rounded-lg">
                 <div className="text-2xl font-bold text-green-600">
-                  {customers.filter(c => c.amcType === 'B').length}
+                  {customersWithUpdatedStatus.filter(c => c.amcType === 'B').length}
                 </div>
                 <p className="text-sm text-green-600">Type B (Standard)</p>
                 <p className="text-xs text-muted-foreground">Monthly Service</p>
               </div>
               <div className="text-center p-4 bg-purple-50 rounded-lg">
                 <div className="text-2xl font-bold text-purple-600">
-                  {customers.filter(c => c.amcType === 'C').length}
+                  {customersWithUpdatedStatus.filter(c => c.amcType === 'C').length}
                 </div>
                 <p className="text-sm text-purple-600">Type C (Basic)</p>
                 <p className="text-xs text-muted-foreground">On-Demand</p>
