@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
@@ -87,7 +86,7 @@ export const useCustomers = () => {
     try {
       const { data, error } = await supabase
         .from('customers')
-        .insert([{
+        .insert({
           user_id: user.id,
           company_name: customerData.companyName,
           owner_name: customerData.ownerName,
@@ -97,14 +96,14 @@ export const useCustomers = () => {
           amc_start_date: customerData.amcStartDate,
           amc_end_date: customerData.amcEndDate,
           amc_type: customerData.amcType,
-          amc_amount: customerData.amcAmount.toString(),
+          amc_amount: customerData.amcAmount,
           product_description: customerData.productDescription,
           invoice_number: customerData.invoiceNumber,
           invoice_date: customerData.invoiceDate,
-          invoice_amount: customerData.invoiceAmount.toString(),
+          invoice_amount: customerData.invoiceAmount,
           status: customerData.status,
           next_service_date: customerData.nextServiceDate,
-        }])
+        })
         .select()
         .single();
 
@@ -149,11 +148,11 @@ export const useCustomers = () => {
           amc_start_date: updatedCustomer.amcStartDate,
           amc_end_date: updatedCustomer.amcEndDate,
           amc_type: updatedCustomer.amcType,
-          amc_amount: updatedCustomer.amcAmount.toString(),
+          amc_amount: updatedCustomer.amcAmount,
           product_description: updatedCustomer.productDescription,
           invoice_number: updatedCustomer.invoiceNumber,
           invoice_date: updatedCustomer.invoiceDate,
-          invoice_amount: updatedCustomer.invoiceAmount.toString(),
+          invoice_amount: updatedCustomer.invoiceAmount,
           status: updatedCustomer.status,
           next_service_date: updatedCustomer.nextServiceDate,
         })
