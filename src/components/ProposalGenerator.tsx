@@ -32,46 +32,74 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
       case 'A':
         return {
           title: 'TYPE A (Premium Plan) - Weekly Service',
-          services: [
-            'CCTV camera system weekly testing camp recording, time and date, power supply, hard disk as well as camera system',
-            'CCTV camera system backup when required',
-            'Unlimited breakdown service calls in CCTV camera system',
-            'Software upgrade online monitoring monitoring report in CCTV camera system',
-            'Hard disk health as well as other information in CCTV camera system',
-            '1st Priority service call attendance'
-          ],
+          services: {
+            gujarati: [
+              'CCTV કેમેરા સિસ્ટમનું વીલાલી ટેસ્ટિંગ કેમ્પ રેકોર્ડિંગ, ટાઇમ અને તારીખ, પાવર સપ્લાય, હાર્ડ ડિસ્ક તેમજ કેમેરા સિસ્ટમ',
+              'CCTV કેમેરા સિસ્ટમનું બેકઅપ જ્યારે જરૂરિયાત હોય ત્યારે',
+              'CCTV કેમેરા સિસ્ટમમાં અનલિમિટેડ બેક ડાઉન સર્વિસ કૉલ',
+              'CCTV કેમેરા સિસ્ટમમાં સોફ્ટવેર અપગ્રેડ ઑનનાઇન મોનાઇટિંગ મોનીટરિંગ રીપોર્ટ',
+              'CCTV કેમેરા સિસ્ટમમાં હાર્ડિસ્ક હેલ્થ તેમજ અદર્શ ઇન્ફોર્મેશન',
+              '1st Priority સર્વિસ કૉલ એટેન્ડન્સ'
+            ],
+            english: [
+              'CCTV camera system weekly testing camp recording, time and date, power supply, hard disk as well as camera system',
+              'CCTV camera system backup when required',
+              'Unlimited back down service calls in CCTV camera system',
+              'Software upgrade online monitoring monitoring report in CCTV camera system',
+              'Hard disk health as well as other information in CCTV camera system',
+              '1st Priority service call attendance'
+            ]
+          },
           frequency: 'Weekly Service Visits'
         };
       case 'B':
         return {
           title: 'TYPE B (Standard Plan) - Monthly Service',
-          services: [
-            'Camera system monthly testing camp recording time and date power supply hard disk as well as camera system',
-            'CCTV camera system backup when required',
-            'Unlimited breakdown service calls in CCTV camera system',
-            'Software upgrade online monitoring monitoring report in CCTV camera system',
-            'Hard disk health as well as other information in CCTV camera system',
-            '2nd Priority service call attendance'
-          ],
+          services: {
+            gujarati: [
+              'કેમેરા સિસ્ટમનું મંથલી ટેસ્ટિંગ કેમ્પ રેકોર્ડિંગ ટાઇમ અને તારીખ પાવર સપ્લાય હાર્ડ ડિસ્ક તેમજ કેમેરા સિસ્ટમ',
+              'CCTV કેમેરા સિસ્ટમનું બેકઅપ જ્યારે જરૂરિયાત હોય ત્યારે',
+              'CCTV કેમેરા સિસ્ટમમાં અનલિમિટેડ બેક ડાઉન સર્વિસ કૉલ',
+              'CCTV કેમેરા સિસ્ટમમાં સોફ્ટવેર અપગ્રેડ ઑનનાઇન મોનાઇટિંગ મોનીટરિંગ રીપોર્ટ',
+              'CCTV કેમેરા સિસ્ટમમાં હાર્ડિસ્ક હેલ્થ તેમજ અદર્શ ઇન્ફોર્મેશન',
+              '2nd Priority સર્વિસ કૉલ એટેન્ડન્સ'
+            ],
+            english: [
+              'Camera system monthly testing camp recording time and date power supply hard disk as well as camera system',
+              'CCTV camera system backup when required',
+              'Unlimited back down service calls in CCTV camera system',
+              'Software upgrade online monitoring monitoring report in CCTV camera system',
+              'Hard disk health as well as other information in CCTV camera system',
+              '2nd Priority service call attendance'
+            ]
+          },
           frequency: 'Monthly Service Visits'
         };
       case 'C':
         return {
           title: 'TYPE C (Basic Plan) - On-Demand Service',
-          services: [
-            'CCTV camera system backup when required',
-            'Unlimited breakdown service calls in CCTV camera system',
-            'Software upgrade online support in CCTV camera system',
-            'Hard disk health as well as other information in CCTV camera system',
-            '3rd Priority service call attendance'
-          ],
+          services: {
+            gujarati: [
+              'CCTV કેમેરા સિસ્ટમનું બેક અપ જ્યારે જરૂરિયાત હોય ત્યારે',
+              'CCTV કેમેરા સિસ્ટમમાં અનલિમિટેડ બેક ડાઉન સર્વિસ કૉલ',
+              'CCTV કેમેરા સિસ્ટમમાં સોફ્ટવેર અપગ્રેડ ઑનનાઇન સપોર્ટ',
+              'CCTV કેમેરા સિસ્ટમમાં હાર્ડિસ્ક હેલ્થ તેમજ અદર્શ ઇન્ફોર્મેશન',
+              '3rd Priority સર્વિસ કૉલ એટેન્ડન્સ'
+            ],
+            english: [
+              'CCTV camera system backup when required',
+              'Unlimited back down service calls in CCTV camera system',
+              'Software upgrade online support in CCTV camera system',
+              'Hard disk health as well as other information in CCTV camera system',
+              '3rd Priority service call attendance'
+            ]
+          },
           frequency: 'On-Demand Service Only'
         };
     }
   };
 
   const typeDetails = getAMCTypeDetails(customer.amcType);
-  const proposalNumber = `PROP-${Date.now()}`;
   const proposalDate = new Date().toLocaleDateString();
 
   const handlePrint = () => {
@@ -112,8 +140,8 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
               <h1 className="text-3xl font-bold text-primary mb-2">MAX Digital & Services</h1>
               <p className="text-lg text-muted-foreground">CCTV Installation & Maintenance Services</p>
               <div className="mt-4 text-sm text-muted-foreground">
-                <p>Email: info@maxdigitalservices.com | Phone: +91 9876543210</p>
-                <p>Address: 123 Technology Street, Digital City, Tech State - 123456</p>
+                <p>Phone: 9825452543</p>
+                <p>First Floor, Radheshyam Chambers, to, Pirchhalla St, near Gruhlakshmi Haluriya, Vora Bazar, Bhavnagar, Gujarat 364001</p>
               </div>
             </div>
 
@@ -122,9 +150,8 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
               <div>
                 <h2 className="text-xl font-semibold mb-4">AMC PROPOSAL</h2>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Proposal No:</strong> {proposalNumber}</p>
                   <p><strong>Date:</strong> {proposalDate}</p>
-                  <p><strong>Valid Until:</strong> {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+                  <p><strong>Valid Until:</strong> {new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
                 </div>
               </div>
               <div>
@@ -142,7 +169,7 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
             {/* Product Description */}
             {customer.productDescription && (
               <div className="mb-8">
-                <h3 className="text-lg font-semibold mb-3">System Details:</h3>
+                <h3 className="text-lg font-semibold mb-3">Description of Products/Services:</h3>
                 <div className="bg-muted p-4 rounded-lg">
                   <p className="text-sm">{customer.productDescription}</p>
                 </div>
@@ -157,19 +184,35 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
                 <p className="text-sm text-muted-foreground mb-4">{typeDetails.frequency}</p>
                 
                 <h5 className="font-semibold mb-3">Services Included:</h5>
-                <ul className="space-y-2 text-sm">
-                  {typeDetails.services.map((service, index) => (
-                    <li key={index} className="flex items-start">
-                      <span className="text-primary mr-2">•</span>
-                      <span>{service}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h6 className="font-medium mb-2">Gujarati</h6>
+                    <ul className="space-y-2 text-sm">
+                      {typeDetails.services.gujarati.map((service, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-primary mr-2">•</span>
+                          <span>{service}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div>
+                    <h6 className="font-medium mb-2">English</h6>
+                    <ul className="space-y-2 text-sm">
+                      {typeDetails.services.english.map((service, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-primary mr-2">•</span>
+                          <span>{service}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Contract Details */}
-            <div className="grid grid-cols-2 gap-8 mb-8">
+            <div className="grid grid-cols-2 gap-6 mb-8">
               <div>
                 <h3 className="text-lg font-semibold mb-3">Contract Duration</h3>
                 <div className="bg-muted p-4 rounded-lg text-sm space-y-2">
@@ -188,34 +231,16 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
               </div>
             </div>
 
-            {/* Terms and Conditions */}
-            <div className="mb-8">
-              <h3 className="text-lg font-semibold mb-3">Terms & Conditions</h3>
-              <div className="text-sm space-y-2">
-                <ol className="list-decimal list-inside space-y-1">
-                  <li>Payment terms: 100% advance payment required before service commencement.</li>
-                  <li>Service will be provided during business hours (9 AM to 6 PM).</li>
-                  <li>Emergency breakdown services available 24/7 for Type A customers.</li>
-                  <li>Customer must provide safe and easy access to the equipment.</li>
-                  <li>Replacement parts, if required, will be charged separately.</li>
-                  <li>This contract is non-transferable and valid for the specified duration only.</li>
-                  <li>Any modifications to this agreement must be in writing and signed by both parties.</li>
-                </ol>
-              </div>
-            </div>
-
             {/* Payment Terms */}
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-3">Payment Information</h3>
               <div className="bg-muted p-4 rounded-lg text-sm">
                 <p><strong>Payment Mode:</strong> Bank Transfer / Cheque / Cash</p>
-                <p><strong>Bank Details:</strong> MAX Digital Services, Account No: 1234567890, IFSC: BANK0001234</p>
-                <p><strong>GST No:</strong> 29ABCDE1234F1Z5</p>
               </div>
             </div>
 
             {/* Signature Section */}
-            <div className="grid grid-cols-2 gap-8 mt-12 pt-8 border-t">
+            <div className="grid grid-cols-2 gap-8">
               <div>
                 <h4 className="font-semibold mb-8">Customer Acceptance</h4>
                 <div className="space-y-4">
@@ -236,8 +261,6 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
                   </div>
                   <div>
                     <p className="text-sm"><strong>Name:</strong> Authorized Person</p>
-                    <p className="text-sm"><strong>Title:</strong> Director</p>
-                    <p className="text-sm"><strong>MAX Digital & Services</strong></p>
                   </div>
                 </div>
               </div>
@@ -246,7 +269,7 @@ const ProposalGenerator: React.FC<ProposalGeneratorProps> = ({ customer, onBack 
             {/* Footer */}
             <div className="text-center mt-8 pt-4 border-t text-xs text-muted-foreground">
               <p>Thank you for choosing MAX Digital & Services for your CCTV maintenance needs.</p>
-              <p>For any queries, please contact us at info@maxdigitalservices.com or +91 9876543210</p>
+              <p>For any queries, please contact us at 9825452543</p>
             </div>
           </CardContent>
         </Card>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -154,9 +153,9 @@ const CustomerList: React.FC<CustomerListProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="A">Type A (Premium)</SelectItem>
-                  <SelectItem value="B">Type B (Standard)</SelectItem>
-                  <SelectItem value="C">Type C (Basic)</SelectItem>
+                  <SelectItem value="A">Type A (Weekly)</SelectItem>
+                  <SelectItem value="B">Type B (Monthly)</SelectItem>
+                  <SelectItem value="C">Type C (When Required)</SelectItem>
                 </SelectContent>
               </Select>
 
