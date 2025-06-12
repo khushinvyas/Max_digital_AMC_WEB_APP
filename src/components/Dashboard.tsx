@@ -9,7 +9,7 @@ import CustomerForm from './CustomerForm';
 import CustomerList from './CustomerList';
 import ProposalGenerator from './ProposalGenerator';
 
-interface Customer {
+interface BaseCustomer {
   id: string;
   companyName: string;
   ownerName: string;
@@ -21,16 +21,28 @@ interface Customer {
   amcType: 'A' | 'B' | 'C';
   amcAmount: number;
   productDescription: string;
-  invoiceNumber: string;
-  invoiceDate: string;
-  invoiceAmount: number;
-  status: 'active' | 'proposed' | 'expired' | 'suspended' | 'cancelled';
   nextServiceDate?: string;
 }
 
+interface ProposedCustomer extends BaseCustomer {
+  status: 'proposed';
+  invoiceNumber?: string;
+  invoiceDate?: string;
+  invoiceAmount?: number;
+}
+
+interface ActiveCustomer extends BaseCustomer {
+  status: 'active' | 'expired' | 'suspended' | 'cancelled';
+  invoiceNumber: string;
+  invoiceDate: string;
+  invoiceAmount: number;
+}
+
+type Customer = ProposedCustomer | ActiveCustomer;
+
 const Dashboard = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'add-customer' | 'customers' | 'proposal'>('dashboard');
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<ProposedCustomer | ActiveCustomer | null>(null);
   const { user, signOut } = useAuth();
   const { customers, loading, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
 
@@ -111,13 +123,28 @@ const Dashboard = () => {
       nextServiceDate = nextService.toISOString().split('T')[0];
     }
 
-    return { ...customer, status, nextServiceDate };
+    // Create the appropriate customer type based on status
+    if (status === 'proposed') {
+      return {
+        ...customer,
+        status,
+        nextServiceDate,
+      } as ProposedCustomer;
+    } else {
+      return {
+        ...customer,
+        status,
+        nextServiceDate,
+      } as ActiveCustomer;
+    }
   });
 
   // Calculate dashboard metrics
   const activeCustomers = customersWithUpdatedStatus.filter(c => c.status === 'active');
   const proposedCustomers = customersWithUpdatedStatus.filter(c => c.status === 'proposed');
   const expiredCustomers = customersWithUpdatedStatus.filter(c => c.status === 'expired');
+  
+  const totalActiveAMCAmount = activeCustomers.reduce((total, customer) => total + customer.amcAmount, 0);
   
   const today = new Date().toISOString().split('T')[0];
   const todaysServices = customersWithUpdatedStatus.filter(c => c.nextServiceDate === today);
@@ -274,12 +301,12 @@ const Dashboard = () => {
 
           <Card className="cursor-pointer hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Today's Services</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Active AMC</CardTitle>
               <Calendar className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{todaysServices.length}</div>
-              <p className="text-xs text-muted-foreground">Scheduled for today</p>
+              <div className="text-2xl font-bold text-primary">₹{totalActiveAMCAmount.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Total value of active contracts</p>
             </CardContent>
           </Card>
         </div>
