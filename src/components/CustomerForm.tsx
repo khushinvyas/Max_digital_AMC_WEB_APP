@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,6 +76,13 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
     if (!formData.amcStartDate) newErrors.amcStartDate = 'AMC start date is required';
     if (formData.amcAmount <= 0) newErrors.amcAmount = 'AMC amount must be greater than 0';
 
+    // Only validate invoice fields if status is not 'proposed'
+    if (formData.status !== 'proposed') {
+      if (!formData.invoiceNumber?.trim()) newErrors.invoiceNumber = 'Invoice number is required';
+      if (!formData.invoiceDate) newErrors.invoiceDate = 'Invoice date is required';
+      if (formData.invoiceAmount <= 0) newErrors.invoiceAmount = 'Invoice amount must be greater than 0';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -110,14 +116,14 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Generate invoice number if not provided
-      if (!formData.invoiceNumber) {
-        const invoiceNum = `INV-${Date.now()}`;
-        setFormData(prev => ({ ...prev, invoiceNumber: invoiceNum }));
-        onSubmit({ ...formData, invoiceNumber: invoiceNum });
-      } else {
-        onSubmit(formData);
-      }
+      // For proposed status, set all invoice fields to null
+      const submitData = {
+        ...formData,
+        invoiceNumber: formData.status === 'proposed' ? null : formData.invoiceNumber,
+        invoiceDate: formData.status === 'proposed' ? null : formData.invoiceDate,
+        invoiceAmount: formData.status === 'proposed' ? null : formData.invoiceAmount,
+      };
+      onSubmit(submitData);
     }
   };
 
@@ -311,21 +317,22 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
           {/* Invoice Details */}
           <Card>
             <CardHeader>
-              <CardTitle>Invoice Details</CardTitle>
+              <CardTitle>Invoice Details {formData.status === 'proposed' && '(Optional for Proposals)'}</CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="invoiceNumber">Invoice Number</Label>
+                <Label htmlFor="invoiceNumber">Invoice Number {formData.status === 'proposed' && '(Optional)'}</Label>
                 <Input
                   id="invoiceNumber"
                   value={formData.invoiceNumber}
                   onChange={(e) => handleInputChange('invoiceNumber', e.target.value)}
-                  placeholder="Auto-generated if empty"
+                  placeholder={formData.status === 'proposed' ? "Will be generated later" : "Enter invoice number"}
+                  disabled={formData.status === 'proposed'}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label>Invoice Date</Label>
+                <Label>Invoice Date {formData.status === 'proposed' && '(Optional)'}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -334,6 +341,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
                         "w-full justify-start text-left font-normal",
                         !invoiceDate && "text-muted-foreground"
                       )}
+                      disabled={formData.status === 'proposed'}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {invoiceDate ? format(invoiceDate, "PPP") : "Pick a date"}
@@ -346,19 +354,21 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
                       onSelect={handleInvoiceDateChange}
                       initialFocus
                       className="pointer-events-auto"
+                      disabled={formData.status === 'proposed'}
                     />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="invoiceAmount">Invoice Amount</Label>
+                <Label htmlFor="invoiceAmount">Invoice Amount {formData.status === 'proposed' && '(Optional)'}</Label>
                 <Input
                   id="invoiceAmount"
                   type="number"
                   value={formData.invoiceAmount}
                   onChange={(e) => handleInputChange('invoiceAmount', parseFloat(e.target.value) || 0)}
-                  placeholder="Enter invoice amount"
+                  placeholder={formData.status === 'proposed' ? "Will be set later" : "Enter invoice amount"}
+                  disabled={formData.status === 'proposed'}
                 />
               </div>
             </CardContent>

@@ -18,9 +18,9 @@ CREATE TABLE public.customers (
   amc_type amc_type NOT NULL,
   amc_amount DECIMAL(10,2) NOT NULL,
   product_description TEXT,
-  invoice_number TEXT NOT NULL,
-  invoice_date DATE NOT NULL,
-  invoice_amount DECIMAL(10,2) NOT NULL,
+  invoice_number TEXT NULL,
+  invoice_date DATE NULL,
+  invoice_amount DECIMAL(10,2) NULL,
   status customer_status NOT NULL DEFAULT 'proposed',
   next_service_date DATE,
   last_service_date DATE,
@@ -117,5 +117,8 @@ CREATE TRIGGER update_profiles_updated_at
     BEFORE UPDATE ON public.profiles
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Add unique constraint on invoice numbers per user
-CREATE UNIQUE INDEX customers_invoice_number_user_id_idx ON public.customers (invoice_number, user_id);
+-- Add unique constraint on invoice numbers per user (allowing nulls)
+DROP INDEX IF EXISTS customers_invoice_number_user_id_idx;
+CREATE UNIQUE INDEX customers_invoice_number_user_id_idx 
+ON public.customers (invoice_number, user_id) 
+WHERE invoice_number IS NOT NULL;

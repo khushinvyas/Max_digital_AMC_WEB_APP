@@ -15,9 +15,9 @@ interface Customer {
   amcType: 'A' | 'B' | 'C';
   amcAmount: number;
   productDescription: string;
-  invoiceNumber: string;
-  invoiceDate: string;
-  invoiceAmount: number;
+  invoiceNumber?: string | null;
+  invoiceDate?: string | null;
+  invoiceAmount?: number | null;
   status: 'active' | 'proposed' | 'expired' | 'suspended' | 'cancelled';
   nextServiceDate?: string;
   lastServiceDate?: string;
@@ -104,8 +104,7 @@ export const useCustomers = () => {
           invoice_date: customerData.invoiceDate,
           invoice_amount: customerData.invoiceAmount,
           status: customerData.status,
-          next_service_date: customerData.nextServiceDate,
-          last_service_date: customerData.lastServiceDate,
+          next_service_date: customerData.nextServiceDate
         })
         .select()
         .single();
