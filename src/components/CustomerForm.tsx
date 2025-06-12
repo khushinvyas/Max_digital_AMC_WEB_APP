@@ -93,6 +93,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ onSubmit, onCancel, initial
       const startDateStr = format(date, 'yyyy-MM-dd');
       const endDate = new Date(date);
       endDate.setFullYear(date.getFullYear() + 1);
+      endDate.setDate(endDate.getDate() - 1);
       const endDateStr = format(endDate, 'yyyy-MM-dd');
       
       setFormData(prev => ({
